@@ -1,25 +1,27 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MyAppDataAccess;
+using MyAppDataAccess.Infrastructure.IRepository;
 using MyAppModels;
 
-namespace Shopping.Controllers
+namespace Shopping.Areas.Admin.Controllers
 {
     public class CategoryController : Controller
     {
-        private ApplicationDbContext _context;
+        private IUnitOfWork _unitOfWork;
 
-        public CategoryController(ApplicationDbContext context)
+
+        public CategoryController(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public IActionResult Index()
         {
             //ienumerable does not return null
-            IEnumerable<Category> category = _context.Categories;
+            IEnumerable<Category> category = _unitOfWork.CategoryRepository.GetAll();
             return View(category);
         }
-      
+
         [HttpGet]
         public IActionResult Create()
         {
@@ -32,8 +34,8 @@ namespace Shopping.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Categories.Add(category);
-                _context.SaveChanges();
+                _unitOfWork.CategoryRepository.Add(category);
+                _unitOfWork.Save();
                 //TempData["success"] = "Category created";
                 return RedirectToAction("Index");
             }
@@ -42,36 +44,46 @@ namespace Shopping.Controllers
         //EDIT
 
         [HttpGet]
-        public IActionResult Edit(int? id)
+        public IActionResult CreateUpdate(int? id)
         {
-            if (id == null || id==0)
+            Category categories = new Category();
+            if (id == null || id == 0)
             {
-                return NotFound();
+                return View(categories);
             }
-
-                var category = _context.Categories.Find(id);
+            else
+            {
+                var category = _unitOfWork.CategoryRepository.GetT(x => x.ID == id);
                 if (category == null)
                 {
                     return NotFound();
                 }
-
+                else
+                {
+                    return View(category);
+                }
             
-            return View(category);
+                     
+            }
+
+
+
+           
         }
         [HttpPost]
         [ValidateAntiForgeryToken]//cross side scripting attack is prevented by it(inspect copy form wont  validate)
-        public IActionResult Edit(Category category)
+        public IActionResult CreateUpdate(Category category)
         {
             if (ModelState.IsValid)
             {
-                _context.Categories.Update(category);
-                _context.SaveChanges();
+                _unitOfWork.CategoryRepository.Update(category);
+                _unitOfWork.Save();
                 TempData["success"] = "Category Edited";
                 return RedirectToAction("Index");
             }
             return RedirectToAction("Index");
         }
-       //Delete
+        //Delete
         [HttpGet]
         public IActionResult Delete(int? id)
         {
@@ -80,7 +92,7 @@ namespace Shopping.Controllers
                 return NotFound();
             }
 
-            var category = _context.Categories.Find(id);
+            var category = _unitOfWork.CategoryRepository.GetT(x => x.ID == id);
             if (category == null)
             {
                 return NotFound();
@@ -89,15 +101,15 @@ namespace Shopping.Controllers
 
             return View(category);
         }
-        [HttpPost,ActionName("Delete")]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]//cross side scripting attack is prevented by it(inspect copy form wont  validate)
-        public IActionResult DeleteCategory (int? id)
+        public IActionResult DeleteCategory(int? id)
         {
-              
-            var category=_context.Categories.Find(id);
-            _context.Categories.Remove(category);
+
+            var category = _unitOfWork.CategoryRepository.GetT(x => x.ID == id);
+            _unitOfWork.CategoryRepository.Delete(category);
             TempData["success"] = "Category Deleted";
-            _context.SaveChanges();
+            _unitOfWork.Save();
             return RedirectToAction("Index");
         }
 

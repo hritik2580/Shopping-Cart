@@ -1,23 +1,23 @@
-﻿@model Category
+﻿@model MyAppModels.ViewModels.CategoryVM
 
 <form method="post">
 
     <div class="border p-3 mt-4">
         <div class="row pb-3">
-            <h2 class="text primary">Update Category</h2>
+            <h2 class="text primary">@Model.Category</h2>
        
              </div>
             @* <div asp-validation-summary=All></div>*@
              <div class="row mb-3">
-                 <lable asp-for="Name"></lable>
-                 <input asp-for="Name" />
-                 <span asp-validation-for="Name" class="text-danger"></span>
+            <lable asp-for="Category.Name"></lable>
+            <input asp-for="Category.Name" />
+            <span asp-validation-for="Category.Name" class="text-danger"></span>
                  </div>
 
                  <div class="row mb-3">
-                    <lable asp-for="DisplayOrder"></lable>
-                 <input asp-for="DisplayOrder" />
-            <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+            <lable asp-for="Category.DisplayOrder"></lable>
+            <input asp-for="Category.DisplayOrder" />
+            <span asp-validation-for="Category.DisplayOrder" class="text-danger"></span>
                  </div>
        @* <div class="row mb-3">
             <lable asp-for="ID"></lable>
